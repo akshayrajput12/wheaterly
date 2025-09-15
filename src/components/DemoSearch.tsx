@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getWeatherByCity, getForecastByCity } from "@/lib/openweather";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -14,8 +14,10 @@ export default function DemoSearch() {
   const [forecastData, setForecastData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Expanded list of cities for better suggestions
+  // Expanded list of unique cities for better suggestions
   const cities = [
     "New York", "London", "Tokyo", "Paris", "Sydney", "Berlin", "Rome", "Madrid", 
     "Toronto", "Dubai", "Singapore", "Mumbai", "Delhi", "Bangkok", "Istanbul", 
@@ -45,42 +47,56 @@ export default function DemoSearch() {
     "Bardhaman", "Shimoga", "Ramagundam", "Chittoor", "Bijapur", "Anantapur", 
     "Khammam", "Ongole", "Nandyal", "Machilipatnam", "Mathura", "Hapur", 
     "Avadi", "Kurnool", "Etawah", "Kadapa", "Haldia", "Raebareli", "Port Blair", 
-    "Junagadh", "Gandhidham", "Belgaum", "Jammu", "Davanagere", "Gaya", "Raigarh", 
+    "Junagadh", "Gandhidham", "Belgaum", "Jammu", "Gaya", "Raigarh", 
     "Jalgaon", "Dharmavaram", "Kavali", "Latur", "Surendranagar", "Tenali", 
-    "Bidar", "Chandrapur", "Hospet", "Ballari", "Habra", "Kharagpur", "Aizawl", 
-    "Alwar", "Bhimavaram", "Bikaner", "Dibrugarh", "Faizabad", "Gangtok", 
+    "Bidar", "Chandrapur", "Hospet", "Ballari", "Habra", "Kharagpur", 
+    "Alwar", "Bhimavaram", "Dibrugarh", "Faizabad", "Gangtok", 
     "Guntakal", "Haldwani", "Hazaribagh", "Imphal", "Itanagar", "Jorhat", 
-    "Kakinada", "Kannur", "Karnal", "Kavaratti", "Khammam", "Kochi", "Kohima", 
-    "Kolar", "Kolhapur", "Kolkata", "Kollam", "Korba", "Kota", "Kozhikode", 
-    "Kulti", "Kumbakonam", "Kurnool", "Latur", "Loni", "Lucknow", "Ludhiana", 
-    "Machilipatnam", "Madanapalle", "Madhyamgram", "Madurai", "Mahbubnagar", 
-    "Maheshtala", "Malappuram", "Malegaon", "Mangalore", "Mathura", "Mau", 
-    "Medininagar", "Meerut", "Mehsana", "Mira-Bhayandar", "Miryalaguda", 
-    "Mirzapur", "Moga", "Mokama", "Moradabad", "Morbi", "Morena", "Motihari", 
-    "Mumbai", "Munger", "Muzaffarnagar", "Muzaffarpur", "Mysore", "Nadiad", 
-    "Nagaon", "Nagercoil", "Nagpur", "Naihati", "Nanded", "Nandyal", "Nangloi Jat", 
-    "Nashik", "Navi Mumbai", "Nellore", "New Delhi", "Neyveli", "Noida", 
-    "Ongole", "Orai", "Pali", "Panchkula", "Panihati", "Panipat", "Parbhani", 
-    "Patiala", "Patna", "Phagwara", "Phusro", "Pimpri-Chinchwad", "Pondicherry", 
-    "Proddatur", "Pune", "Puri", "Purnia", "Raebareli", "Raichur", "Raiganj", 
-    "Raipur", "Rajahmundry", "Rajkot", "Rajnandgaon", "Rampur", "Ranchi", 
-    "Ratlam", "Raurkela", "Rewa", "Rohtak", "Rourkela", "Sagar", "Saharanpur", 
-    "Saharsa", "Salem", "Sambalpur", "Sambhal", "Sangli-Miraj & Kupwad", 
-    "Sasaram", "Satara", "Satna", "Secunderabad", "Serampore", "Shahjahanpur", 
-    "Shimla", "Shimoga", "Shivpuri", "Sikar", "Silchar", "Siliguri", "Singrauli", 
-    "Sirsa", "Siwan", "Solapur", "Sonipat", "South Dumdum", "Srinagar", 
-    "Sultan Pur Majra", "Surat", "Surendranagar", "Tadepalligudem", "Tadipatri", 
-    "Tenali", "Thane", "Thanjavur", "Thiruvananthapuram", "Thoothukudi", 
-    "Thrissur", "Tiruchirappalli", "Tirunelveli", "Tirupati", "Tiruppur", 
-    "Udaipur", "Udupi", "Ujjain", "Ulhasnagar", "Vadodara", "Varanasi", 
-    "Vasai-Virar", "Vellore", "Vijayawada", "Visakhapatnam", "Warangal", 
-    "Yamunanagar", "Jaipur", "Jaunpur", "Jhansi", "Jodhpur", "Junagadh", 
-    "Kakinada", "Kannur", "Kanpur", "Kochi", "Kolkata", "Kollam", "Kota", 
-    "Kozhikode", "Kurnool", "Lucknow", "Ludhiana", "Madurai", "Malappuram", 
-    "Mangalore", "Mumbai", "Mysore", "Nagpur", "Nashik", "Patna", "Pune", 
-    "Raipur", "Rajkot", "Ranchi", "Salem", "Srinagar", "Surat", "Thane", 
-    "Thiruvananthapuram", "Vadodara", "Varanasi", "Vijayawada", "Visakhapatnam"
+    "Kannur", "Kavaratti", "Kohima", "Kolar", 
+    "Kulti", "Kumbakonam", 
+    "Machilipatnam", "Madanapalle", "Madhyamgram", "Mahbubnagar", 
+    "Maheshtala", "Malappuram", "Mau", 
+    "Medininagar", "Mehsana", "Miryalaguda", 
+    "Moga", "Mokama", "Morbi", "Morena", "Motihari", 
+    "Munger", "Muzaffarnagar", "Nadiad", 
+    "Nagaon", "Nagercoil", "Naihati", "Nangloi Jat", 
+    "Neyveli", "New Delhi", 
+    "Orai", "Panchkula", "Panihati", 
+    "Phagwara", "Phusro", "Pondicherry", 
+    "Proddatur", "Puri", "Purnia", 
+    "Rajnandgaon", "Rampur", 
+    "Ratlam", "Raurkela", "Rohtak", "Sagar", "Saharsa", 
+    "Sambalpur", "Sambhal", 
+    "Sasaram", "Satara", "Secunderabad", "Serampore", 
+    "Shimla", "Shivpuri", "Silchar", "Singrauli", 
+    "Sirsa", "Siwan", "South Dumdum", 
+    "Sultan Pur Majra", 
+    "Thanjavur", "Thiruvananthapuram", "Thoothukudi", 
+    "Tirupati", "Udaipur", "Udupi", 
+    "Vellore", "Yamunanagar", "Jaunpur", "Junagadh", 
+    "Kavaratti", "Kochi", "Kollam", "Kozhikode"
   ];
+
+  // Handle click anywhere on the search container to focus the input
+  const handleContainerClick = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      setIsFocused(true);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (debouncedSearchTerm.length > 1) {
@@ -88,7 +104,9 @@ export default function DemoSearch() {
       const filtered = cities.filter(city => 
         city.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
-      setSuggestions(filtered.slice(0, 8));
+      // Remove duplicates and limit to 8 suggestions
+      const uniqueSuggestions = Array.from(new Set(filtered)).slice(0, 8);
+      setSuggestions(uniqueSuggestions);
     } else {
       setSuggestions([]);
     }
@@ -160,42 +178,46 @@ export default function DemoSearch() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <motion.form 
-        onSubmit={handleSearch}
-        className="relative"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <motion.input
-          type="text"
-          value={searchTerm}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          placeholder="Search for a city (e.g. Jaipur, New York, Tokyo)..."
-          className="w-full px-6 py-4 rounded-full bg-white border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
-          whileFocus={{ 
-            scale: 1.02,
-            boxShadow: "0 0 0 4px rgba(59, 130, 246, 0.2)"
-          }}
-        />
-        
-        <motion.button
-          type="submit"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors flex items-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          disabled={loading}
+      <div ref={searchContainerRef} onClick={handleContainerClick} className="cursor-text">
+        <motion.form 
+          onSubmit={handleSearch}
+          className="relative"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
-          {loading ? (
-            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : "Search"}
-        </motion.button>
-      </motion.form>
+          <motion.input
+            type="text"
+            value={searchTerm}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            placeholder="Search for a city (e.g. Jaipur, New York, Tokyo)..."
+            className="w-full px-6 py-4 rounded-full bg-white border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+            whileFocus={{ 
+              scale: 1.02,
+              boxShadow: "0 0 0 4px rgba(59, 130, 246, 0.2)"
+            }}
+            ref={inputRef}
+            style={{ caretColor: 'black' }} // Ensure cursor is visible
+          />
+          
+          <motion.button
+            type="submit"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors flex items-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            disabled={loading}
+          >
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : "Search"}
+          </motion.button>
+        </motion.form>
+      </div>
 
       <AnimatePresence>
         {isFocused && suggestions.length > 0 && (
@@ -208,7 +230,7 @@ export default function DemoSearch() {
           >
             {suggestions.map((city, index) => (
               <motion.li
-                key={city}
+                key={`${city}-${index}`} // Use index to ensure unique keys
                 className="px-6 py-3 text-black hover:bg-blue-50 cursor-pointer transition-colors"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -226,13 +248,13 @@ export default function DemoSearch() {
       {/* Weather result and 5-day forecast */}
       {weatherData && (
         <motion.div
-          className="mt-8"
+          className="mt-6"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
           {/* Current weather */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm mb-8">
+          <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm mb-6"> 
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-2xl font-bold text-black">{weatherData.location.name}, {weatherData.location.country}</h3>

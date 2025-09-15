@@ -47,6 +47,11 @@ A beautiful, responsive marketing website for the Weatherly cross-platform mobil
 └─ package.json
 ```
 
+## Documentation
+
+- [Development Challenges and Solutions](DEVELOPMENT_CHALLENGES.md) - Detailed overview of technical challenges encountered and their solutions
+- [Project Report](PROJECT_REPORT.md) - Comprehensive documentation of the project including features, architecture, and design decisions
+
 ## Getting Started
 
 First, install the dependencies:
