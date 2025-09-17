@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
-import Link from "next/link"
 import { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -19,13 +18,12 @@ interface NavBarProps {
 
 export function NavBar({ items, className }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0].name)
-  const [isMobile, setIsMobile] = useState(false)
   const { scrollY } = useScroll()
   const navbarWidth = useTransform(scrollY, [0, 100], ["60%", "50%"])
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
+      // Handle resize if needed
     }
 
     handleResize()

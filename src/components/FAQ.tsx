@@ -13,12 +13,12 @@ export default function FAQs() {
         {
             id: 'item-2',
             question: 'How accurate is the weather data?',
-            answer: 'We use OpenWeatherMap\'s API which provides highly accurate weather data with a 99% accuracy rate for location-based forecasts. Our hyperlocal technology ensures minute-by-minute precision.',
+            answer: 'We use OpenWeatherMap&#39;s API which provides highly accurate weather data with a 99% accuracy rate for location-based forecasts. Our hyperlocal technology ensures minute-by-minute precision.',
         },
         {
             id: 'item-3',
             question: 'Does Weatherly work offline?',
-            answer: 'Weatherly caches your last viewed weather data for offline access, but you\'ll need an internet connection to get updated forecasts. The app works best with a stable connection.',
+            answer: 'Weatherly caches your last viewed weather data for offline access, but you&#39;ll need an internet connection to get updated forecasts. The app works best with a stable connection.',
         },
         {
             id: 'item-4',
@@ -59,7 +59,7 @@ export default function FAQs() {
                     </Accordion>
 
                     <p className="text-muted-foreground mt-6">
-                        Can't find what you're looking for? Contact our{' '}
+                        Can&#39;t find what you&#39;re looking for? Contact our{' '}
                         <Link
                             href="#"
                             className="text-primary font-medium hover:underline">

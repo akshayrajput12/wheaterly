@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent, FormEvent, useRef } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getWeatherByCity, getForecastByCity } from "@/lib/openweather";
+import { getWeatherByCity, getForecastByCity, WeatherData, ForecastData } from "@/lib/openweather";
 import { useDebounce } from "@/hooks/useDebounce";
-import { formatTemperature, getWeatherIcon, formatDate } from "@/utils/format";
+import { formatTemperature, getWeatherIcon } from "@/utils/format";
 
 export default function DemoSearch() {
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const [weatherData, setWeatherData] = useState<any>(null);
-  const [forecastData, setForecastData] = useState<any[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData['forecast']['forecastday']>([]);
   const [loading, setLoading] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Expanded list of unique cities for better suggestions
-  const cities = [
+  const cities = useMemo(() => [
     "New York", "London", "Tokyo", "Paris", "Sydney", "Berlin", "Rome", "Madrid", 
     "Toronto", "Dubai", "Singapore", "Mumbai", "Delhi", "Bangkok", "Istanbul", 
     "Seoul", "Shanghai", "São Paulo", "Mexico City", "Cairo", "Moscow", "Beijing", 
@@ -75,7 +75,7 @@ export default function DemoSearch() {
     "Tirupati", "Udaipur", "Udupi", 
     "Vellore", "Yamunanagar", "Jaunpur", "Junagadh", 
     "Kavaratti", "Kochi", "Kollam", "Kozhikode"
-  ];
+  ], []);
 
   // Handle click anywhere on the search container to focus the input
   const handleContainerClick = () => {
@@ -110,7 +110,7 @@ export default function DemoSearch() {
     } else {
       setSuggestions([]);
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, cities]);
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -125,20 +125,10 @@ export default function DemoSearch() {
         setWeatherData(weather);
         setSuggestions([]);
         
-        // Process forecast data to get daily forecasts
-        const dailyForecasts: any[] = [];
-        
         // Get forecast for the next 5 days
-        forecast.forecast.forecastday.slice(0, 5).forEach((day: any) => {
-          dailyForecasts.push({
-            date: day.date,
-            date_epoch: day.date_epoch,
-            day: day.day
-          });
-        });
-        
+        const dailyForecasts = forecast.forecast.forecastday.slice(0, 5);
         setForecastData(dailyForecasts);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error fetching weather data:", error);
         // Show user-friendly error message
         alert(`Could not find weather data for "${searchTerm}". Please check the city name and try again.`);
@@ -290,7 +280,7 @@ export default function DemoSearch() {
           <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm">
             <h3 className="text-xl font-bold text-black mb-6">5-Day Forecast</h3>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {forecastData.map((day: any, index) => (
+              {forecastData.map((day, index) => (
                 <div key={index} className="text-center p-4 rounded-xl border border-gray-200 hover:bg-blue-50 transition-colors">
                   <p className="font-medium text-black">
                     {formatForecastDate(day.date)}

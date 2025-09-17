@@ -7,7 +7,7 @@ import Testimonials from "@/components/Testimonials";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Home as HomeIcon, Cloud, Calendar, Info, HelpCircle, MessageCircle, Users, Download } from 'lucide-react'
+import { Home as HomeIcon, Cloud, Calendar, HelpCircle, MessageCircle, Users, Download } from 'lucide-react'
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
 import {
